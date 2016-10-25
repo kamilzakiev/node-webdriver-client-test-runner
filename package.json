@@ -1,38 +1,38 @@
 {
-  "name": "visual-regression-test-runner",
+  "name": "webdriver-client-test-runner",
   "version": "0.0.1",
   "license": "MIT",
   "author": "Denis Kudelin",
   "bin" : { 
-    "visual-regression-test-runner" : "./bin/cli" 
+    "webdriver-client-test-runner" : "./bin/cli" 
   }, 
   "repository": {
     "type": "git",
-    "url": "https://github.com/DenisKudelin/visual-regression-test-runner.git"
+    "url": "https://github.com/DenisKudelin/webdriver-client-test-runner.git"
   },
   "dependencies": {
     "chalk": "1.1.3",
-    "globule": "^1.0.0",
-    "graphics-magick-binaries": "^0.0.1",
+    "async": "^0.9.0",
+    "globule": "^1.1.0",
+    "graphics-magick-binaries": "latest",
     "gulp": "3.9.1",
-    "is-appveyor": "1.0.0",
-    "jasmine-console-reporter": "1.2.7",
-    "jasmine-core": "2.5.0",
-    "lodash": "4.15.0",
+    "jasmine-console-reporter-custom-1": "latest",
+    "jasmine-core": "2.5.2",
+    "lodash": "4.16.4",
     "mkdirp": "0.5.1",
     "node-uuid": "^1.4.7",
     "q": "1.4.1",
     "rimraf": "2.5.4",
     "run-sequence": "^1.2.2",
-    "selenium-standalone": "5.6.2",
-    "typescript": "1.8.10",
-    "webdrivercss": "https://github.com/DenisKudelin/webdrivercss.git#beta-rc1",
-    "webdriverio": "4.2.7",
+    "webdrivercss-custom-v4-compatible": "latest",
+    "webdriverio": "4.2.16",
     "request": "2.75.0",
     "command-line-args": "3.0.1"
   },
   "engines": {
     "node": ">=4.6.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "tsconfig-extended-typescript-builder": "0.0.2"
+  }
 }

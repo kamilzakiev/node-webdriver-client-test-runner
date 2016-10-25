@@ -1,1 +1,1 @@
-﻿module.exports = require("./lib/visual-regression-test-runner/index");
+﻿module.exports = require("./lib/webdriver-client-test-runner/index");
