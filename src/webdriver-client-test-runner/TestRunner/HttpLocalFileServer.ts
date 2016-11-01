@@ -1,7 +1,7 @@
 ﻿import * as Http from "http";
 import {_, Q, Path, FS, Globule, Url, Chalk} from "../externals";
 
-export module HttpServer {
+export module HttpLocalFileServer {
     (function init(){
         process.on("exit", stop);
     })();
@@ -28,7 +28,7 @@ export module HttpServer {
             }
 
             FS.readFile(path, "binary", (err, file) => {
-                if(err) {        
+                if(err) {
                     response.writeHead(500, {"Content-Type": "text/plain"});
                     response.write(err + "\n");
                     response.end();
@@ -41,6 +41,13 @@ export module HttpServer {
             });
 
         }).listen(port, "localhost");
+    }
+
+    export function isHttpLocalFileServerUrl(url: string) {
+        let parserUrl = Url.parse(url);
+        let adress = server.address();
+        return parseInt(parserUrl.port) === adress.port
+            && (parserUrl.hostname === adress.address || parserUrl.hostname === "localhost");
     }
 
     export function stop() {

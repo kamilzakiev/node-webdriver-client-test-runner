@@ -1,4 +1,4 @@
-﻿import {Helpers, WebdriverIO, HttpServer} from "../exports";
+﻿import {Helpers, WebdriverIO, HttpLocalFileServer} from "../exports";
 import {_, Q, Path, FS, Globule, Url, mkdirp, rimraf, Chalk, commandLineArgs} from "../externals";
 import * as WebdriverCSS from "webdrivercss-custom-v4-compatible";
 import {JasmineTestRunner} from "./JasmineTestRunner";
@@ -130,7 +130,7 @@ export module TestRunner {
 
         public run() {
             return Q()
-                .then(() => HttpServer.start())
+                .then(() => HttpLocalFileServer.start())
                 .then(() => {
                     this.clearBaselineImages();
                     this.initJasmine();
@@ -141,7 +141,7 @@ export module TestRunner {
                         (c, addSuites) => this.initTestsByCapabilities(c, addSuites));
                 })
                 .then(() => JasmineTestRunner.execute())
-                .finally(() => HttpServer.stop());
+                .finally(() => HttpLocalFileServer.stop());
         }
 
         private clearBaselineImages() {
@@ -181,6 +181,27 @@ export module TestRunner {
                 afterAll(() => this.closeWebdriverIO(true));
             };
 
+            jasmine.addClientLinks = (addAdditionalLinks?: string | string[], relativeToCallerFilePath?: boolean) => {
+                let files = this.config.execFiles ? Helpers.getFilesByGlob(this.config.execFiles, this.config.rootDir) : [];
+                return this.addFileLinksOnTestPage(this.config.files, this.config.rootDir).then(() => {
+                    if(addAdditionalLinks) return;
+                    return <any>this.addFileLinksOnTestPage(addAdditionalLinks, relativeToCallerFilePath
+                        ? Path.dirname(Helpers.getCallerFilePath())
+                        : this.config.rootDir)
+                });
+            };
+
+            jasmine.execClientScripts = (execAdditionalFiles?: string | string[], relativeToCallerFilePath?: boolean) => {
+                let files = this.config.execFiles ? Helpers.getFilesByGlob(this.config.execFiles, this.config.rootDir) : [];
+
+                if(execAdditionalFiles) {
+                    let rootDir = relativeToCallerFilePath ? Path.dirname(Helpers.getCallerFilePath()) : this.config.rootDir;
+                    files = files.concat(Helpers.getFilesByGlob(execAdditionalFiles, rootDir));
+                }
+
+                return this.webdriverClient.executeFiles(files);
+            };
+
             this.config.jasmine.onInit && this.config.jasmine.onInit();
         }
 
@@ -217,15 +238,10 @@ export module TestRunner {
                     }
                 })
                 .then(() => this.webdriverClient
-                    .url(FS.existsSync(url) ? HttpServer.getUrl(url) : url)
+                    .url(FS.existsSync(url) ? HttpLocalFileServer.getUrl(url) : url)
                     .initConsoleLogReader()
-                    .then(() => this.addFileLinksOnTestPage(url)) // adds css/script links.
-                    .then(() => { // executes scripts.
-                        if(_.isArray(this.config.execFiles)) {
-                            let files = Helpers.getFilesByGlob(this.config.execFiles, this.config.rootDir);
-                            return this.webdriverClient.executeFiles(files);
-                        }
-                     })
+                    .then(() => jasmine.addClientLinks()) // adds css/script links.
+                    .then(() => jasmine.execClientScripts()) // executes scripts.
                     .then(() => { // waits until the page is not ready for testing.
                         if(_.isFunction(this.config.waitUntil)) {
                             return this.webdriverClient.waitUntil(() => this.webdriverClient
@@ -271,24 +287,24 @@ Inner size: ${browserInfo.window.innerWidth}x${browserInfo.window.innerHeight}. 
                 });
         }
 
-        private addFileLinksOnTestPage(url: string) {
-            if(!_.isArray(this.config.files)) {
-                return;
+        private addFileLinksOnTestPage(glob: string[] | string, rootDir: string) {
+            if(!glob) {
+                return this.webdriverClient;
             }
 
-            let isFile = FS.existsSync(url);
-            let files = _.flatten(this.config.files.map(v => {
-                if(Url.parse(v) && Url.parse(v).host) {
-                    return v;
-                } else {
-                    if(isFile) {
-                        let startPageDirName = Path.dirname(url);
-                        return Helpers.getFilesByGlob(v, this.config.rootDir).map(x => HttpServer.getUrl(x));
+            return this.webdriverClient.getUrl().then(url => {
+                let isLocalFile = HttpLocalFileServer.isHttpLocalFileServerUrl(url);
+                let convertedFiles = _.flatten((_.isArray(glob) ? glob : [glob]).map(v => {
+                    if(Url.parse(v) && Url.parse(v).host) {
+                        return v;
+                    } else {
+                        if(isLocalFile) {
+                            return Helpers.getFilesByGlob(v, rootDir).map(x => HttpLocalFileServer.getUrl(x));
+                        }
                     }
-                }
-            })).filter(x => !!x);
-
-            return this.webdriverClient.executeAsync(function(files: string[], done: () => void) {
+                })).filter(x => !!x);
+                return convertedFiles;
+            }).then(files => this.webdriverClient.executeAsync(function(files: string[], done: () => void) {
                 (function addFileLinksAsync(index: number) {
                     setTimeout(function() {
                         if(files[index]) {
@@ -322,7 +338,7 @@ Inner size: ${browserInfo.window.innerWidth}x${browserInfo.window.innerHeight}. 
                             break;
                     }
                 }
-            }, files);
+            }, files)).then(() => {});
         }
 
         private initWebdriverIOAndTestPage(url?: string) {

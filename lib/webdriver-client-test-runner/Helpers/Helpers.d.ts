@@ -6,6 +6,7 @@ export declare module Helpers {
     function callInSequence(sequence: ((value?: any) => Promise<any>)[]): Promise<any>;
     function getFilesByGlob(glob: string[] | string, rootDir?: string): string[];
     function getJavaVersion(): Q.Promise<{}>;
+    function getCallerFilePath(): string;
     function getScreenResolution(): Q.Promise<{
         width: number;
         height: number;

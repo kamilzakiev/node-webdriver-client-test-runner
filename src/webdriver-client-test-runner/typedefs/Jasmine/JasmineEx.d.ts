@@ -18,6 +18,8 @@ declare namespace jasmine {
     export function beforeAllInitTestPage(url?: string): void;
     export function afterEachCloseBrowser(): void;
     export function afterAllCloseBrowser(): void;
+    export function addClientLinks(addAdditionalLinks?: string | string[], relativeToCallerFilePath?: boolean): WebdriverIO.Client<void>;
+    export function execClientScripts(execAdditionalFiles?: string | string[], relativeToCallerFilePath?: boolean): WebdriverIO.Client<void>;
 
     interface Suite {
         getAllChildren(): SuiteOrSpec[];

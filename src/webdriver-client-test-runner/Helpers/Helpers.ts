@@ -54,6 +54,26 @@ export module Helpers {
         return deffer.promise;
     }
 
+    export function getCallerFilePath(): string {
+        let originalFunc = (<any>Error).prepareStackTrace;
+        (<any>Error).prepareStackTrace = function (err, stack) { return stack; };
+        try {
+            let error: { stack: any[]} = <any>new Error();
+            error.stack.shift(); // Removes the current file.
+            let currentfile = error.stack.shift().getFileName();
+            let callerfile;
+            while (error.stack.length) {
+                callerfile = error.stack.shift().getFileName();
+                if(currentfile !== callerfile) {
+                    return callerfile;
+                }
+            }
+        } catch (e) {
+        } finally {
+            (<any>Error).prepareStackTrace = originalFunc; 
+        }
+    }
+
     export function getScreenResolution() {
         return executePSCommands("(Get-WmiObject -Class Win32_VideoController).VideoModeDescription")
             .then((result) => {
