@@ -8,7 +8,7 @@
   }, 
   "repository": {
     "type": "git",
-    "url": "https://github.com/DenisKudelin/webdriver-client-test-runner.git"
+    "url": "https://github.com/DenisKudelin/node-webdriver-client-test-runner.git"
   },
   "dependencies": {
     "chalk": "1.1.3",

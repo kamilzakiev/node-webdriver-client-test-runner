@@ -28,16 +28,17 @@ module.exports = {
 	// [REQUIRED] Browser list to run tests. All specs will be launched for each browser.
     capabilities: [{
         browserName: "chrome"
-    }/*,{
+    },{
        browserName: "chromium", // we also can use "chromium" as the browser name, but a path to chrome.exe should be defined.
        chromeOptions: {
            binary: "path to chrome.exe",
        }
     },{
-        browserName: "firefox" // is not supported yet
+        browserName: "firefox"
+        firefox_binary: "path to firefox.exe"
     },{
-        browserName: "internet explorer" // is not supported yet
-    }*/],
+        browserName: "internet explorer"
+    }],
 
 	// Url or path to a html file that will be opened before all specs are started. If not defined, the blank page will be used.
 	defaultTestPageUrl: "https://www.microsoft.com",
