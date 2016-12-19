@@ -9,7 +9,7 @@ module WebdriverIOEx {
             Chromium: <any>"chromium",
             Firefox: <any>"firefox",
             InternetExplorer: <any>"internet explorer",
-            //Edge: <any>"edge"
+            Edge: <any>"edge"
         };
 
         let originalRemote = WebdriverIO.remote;
